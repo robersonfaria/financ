@@ -17,7 +17,10 @@ class CreateAccountsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('client_id');
             $table->string('name');
+            $table->enum('type', ['CA', 'CC'])->comment('CA = Checking Account, CC = Credit Card');
+            $table->date('due_date');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('client_id')->references('id')->on('clients');
         });

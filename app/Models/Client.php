@@ -13,7 +13,7 @@ class Client extends Model
 
     public function users()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class, 'users_clients');
     }
 
     public function accounts()

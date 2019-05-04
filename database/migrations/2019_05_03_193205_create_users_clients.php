@@ -14,8 +14,8 @@ class CreateUsersClients extends Migration
     public function up()
     {
         Schema::create('users_clients', function (Blueprint $table) {
-            $table->bigIncrements('user_id')->unsigned();
-            $table->bigIncrements('client_id')->unsigned();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('client_id');
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('client_id')->references('id')->on('clients');
