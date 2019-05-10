@@ -8,4 +8,5 @@ final class Operations extends Enum
 {
     const Debit = 'D';
     const Credit = 'C';
+    const Balance = 'B';
 }

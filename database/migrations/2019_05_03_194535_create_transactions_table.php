@@ -16,10 +16,10 @@ class CreateTransactionsTable extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('account_id')->nullable();
-            $table->morphs('origin');
+            $table->nullableMorphs('origin');
             $table->char('external_code',20)->nullable();
             $table->string('description')->nullable();
-            $table->enum('operation', ['D','C'])->comment('D = Debit, C = Credit');
+            $table->enum('operation', ['D','C','B'])->comment('D = Debit, C = Credit, B = Balance');
             $table->float('value');
             $table->boolean('consolidated')->default(false);
             $table->timestamps();
