@@ -14,3 +14,15 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Auth::routes();
+
+Route::group(['middleware' => 'auth'], function () {
+    Route::resource('clients', 'ClientController')->only(['create', 'store']);
+
+    Route::group(['middleware' => 'check.client'], function () {
+        Route::get('/home', 'HomeController@index')->name('home');
+
+        Route::resource('clients', 'ClientController')->only(['edit', 'update']);
+    });
+});
