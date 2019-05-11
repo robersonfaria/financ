@@ -7,14 +7,10 @@ use App\Enums\Operations;
 use App\Models\Account;
 use App\Models\Transaction;
 
-class AccountService
+class BalanceService
 {
 
-    /**
-     * @param Account $account
-     * @return float
-     */
-    public function balance(Account $account): float
+    public function get(Account $account): float
     {
         $lastBalance = $account->transactions()
             ->where('operation', '=', Operations::Balance)
@@ -31,15 +27,14 @@ class AccountService
             $transactions->where('operation', '=', Operations::Debit)->sum('value');
     }
 
-    public function closeBalance(Account $account)
+    public function close(Account $account)
     {
         $transaction = Transaction::create(
             [
-                'value' => $this->balance($account),
+                'value' => $this->get($account),
                 'operation' => Operations::Balance
             ]
         );
-        dd($account->transactions, $transaction);
-        app(TransactionService::class)->add($account, $transaction);
+        return app(TransactionService::class)->add($account, $transaction);
     }
 }

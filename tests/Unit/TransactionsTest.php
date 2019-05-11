@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\Account;
 use App\Models\Transaction;
-use App\Services\AccountService;
+use App\Services\BalanceService;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,6 +12,8 @@ use App\Services\TransactionService;
 
 class TransactionsTest extends TestCase
 {
+
+    use RefreshDatabase;
 
     public function testInsertCredit()
     {
@@ -24,7 +26,7 @@ class TransactionsTest extends TestCase
         app(TransactionService::class)
             ->add($account, $transaction);
 
-        $actualBalance = app(AccountService::class)->balance($account);
+        $actualBalance = app(BalanceService::class)->get($account);
 
         $this->assertEquals($actualBalance, $balance + $transaction->value);
     }
@@ -40,7 +42,7 @@ class TransactionsTest extends TestCase
         app(TransactionService::class)
             ->add($account, $transaction);
 
-        $actualBalance = app(AccountService::class)->balance($account);
+        $actualBalance = app(BalanceService::class)->get($account);
 
         $this->assertEquals($actualBalance, $balance - $transaction->value);
     }
@@ -59,7 +61,7 @@ class TransactionsTest extends TestCase
         app(TransactionService::class)
             ->add($account, $debit);
 
-        $actualBalance = app(AccountService::class)->balance($account);
+        $actualBalance = app(BalanceService::class)->get($account);
 
         $this->assertEquals($actualBalance, $balance + $credit->value - $debit->value);
     }
@@ -68,7 +70,7 @@ class TransactionsTest extends TestCase
     {
         $account = factory(Account::class)->create();
 
-        $balance = $account->transactions->sum('value');
+        $balance = app(BalanceService::class)->get($account);
 
         $credit = factory(Transaction::class)->state('credit')->make();
         $debit = factory(Transaction::class)->state('debit')->make();
@@ -78,8 +80,8 @@ class TransactionsTest extends TestCase
         app(TransactionService::class)
             ->add($account, $debit);
 
-        app(AccountService::class)->closeBalance($account);
+        $finalBalance = app(BalanceService::class)->close($account);
 
-        $this->assertEquals($balance + $credit->value - $debit->value, $account->transactions()->latest()->first()->value);
+        $this->assertEquals($balance + $credit->value - $debit->value, $finalBalance->value);
     }
 }
