@@ -2,13 +2,13 @@
 
 namespace Tests\Unit;
 
+use App\Enums\Operations;
 use App\Models\Account;
-use App\Models\Transaction;
-use App\Services\BalanceService;
+use App\Repositories\Eloquent\AccountRepository;
+use App\Repositories\Eloquent\TransactionRepository;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Services\TransactionService;
 
 class TransactionsTest extends TestCase
 {
@@ -19,69 +19,35 @@ class TransactionsTest extends TestCase
     {
         $account = factory(Account::class)->create();
 
-        $balance = $account->transactions->sum('value');
+        $transactionRepository = app(TransactionRepository::class);
 
-        $transaction = factory(Transaction::class)->state('credit')->make();
+        $transactionRepository->add($account, Operations::Credit, 100)
+            ->consolidate();
 
-        app(TransactionService::class)
-            ->add($account, $transaction);
+        $transactionRepository->add($account, Operations::Credit, 150);
 
-        $actualBalance = app(BalanceService::class)->get($account);
+        $extract = collect((new AccountRepository($account))->extract());
 
-        $this->assertEquals($actualBalance, $balance + $transaction->value);
+        $this->assertEquals($extract->sum("value"), 250);
+
+        $this->assertEquals($extract->where('consolidated', true)->sum("value"), 100);
     }
 
-    public function testInsertDebit()
+    public function testBalance()
     {
         $account = factory(Account::class)->create();
 
-        $balance = $account->transactions->sum('value');
+        $transactionRepository = app(TransactionRepository::class);
 
-        $transaction = factory(Transaction::class)->state('debit')->make();
+        $transactionRepository->add($account, Operations::Credit, 100)
+            ->consolidate();
 
-        app(TransactionService::class)
-            ->add($account, $transaction);
+        $transactionRepository->add($account, Operations::Credit, 150);
 
-        $actualBalance = app(BalanceService::class)->get($account);
+        $accountRepository = new AccountRepository($account);
 
-        $this->assertEquals($actualBalance, $balance - $transaction->value);
-    }
+        $accountRepository->closeBalance();
 
-    public function testManyTransactions()
-    {
-        $account = factory(Account::class)->create();
-
-        $balance = $account->transactions->sum('value');
-
-        $credit = factory(Transaction::class)->state('credit')->make();
-        $debit = factory(Transaction::class)->state('debit')->make();
-
-        app(TransactionService::class)
-            ->add($account, $credit);
-        app(TransactionService::class)
-            ->add($account, $debit);
-
-        $actualBalance = app(BalanceService::class)->get($account);
-
-        $this->assertEquals($actualBalance, $balance + $credit->value - $debit->value);
-    }
-
-    public function testCloseBalance()
-    {
-        $account = factory(Account::class)->create();
-
-        $balance = app(BalanceService::class)->get($account);
-
-        $credit = factory(Transaction::class)->state('credit')->make();
-        $debit = factory(Transaction::class)->state('debit')->make();
-
-        app(TransactionService::class)
-            ->add($account, $credit);
-        app(TransactionService::class)
-            ->add($account, $debit);
-
-        $finalBalance = app(BalanceService::class)->close($account);
-
-        $this->assertEquals($balance + $credit->value - $debit->value, $finalBalance->value);
+        $this->assertEquals($accountRepository->balance()->value, 250);
     }
 }

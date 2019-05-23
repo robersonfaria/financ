@@ -1,0 +1,13 @@
+{
+  "Dashboard": "Painel",
+  "You are logged in!": "Você está logado!",
+  "Register": "Registrar",
+  "Login": "Entrar",
+  "Logout": "Sair",
+  "Name": "Nome",
+  "E-Mail Address": "E-Mail",
+  "Password": "Senha",
+  "Confirm Password": "Confirmação de Senha",
+  "Error writing record": "Erro ao gravar registro.",
+  "Successfully saved registration": "Registro gravado com sucesso."
+}

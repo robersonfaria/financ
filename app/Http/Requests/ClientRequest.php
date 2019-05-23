@@ -32,7 +32,7 @@ class ClientRequest extends FormRequest
     public function attributes()
     {
         return [
-            'name' => __('nome')
+            'name' => __('name')
         ];
     }
 }

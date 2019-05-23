@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Client;
 use App\Http\Requests\ClientRequest;
-use App\Services\ClientServices;
+use App\Repositories\Contracts\ClientRepositoryContract;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ClientController extends Controller
 {
 
     /**
-     * @var ClientServices
+     * @var ClientRepositoryContract
      */
-    private $clientServices;
+    private $clientRepository;
 
-    public function __construct(ClientServices $clientServices)
+    public function __construct(ClientRepositoryContract $clientRepository)
     {
-        $this->clientServices = $clientServices;
+        $this->clientRepository = $clientRepository;
     }
 
     /**
@@ -39,13 +39,13 @@ class ClientController extends Controller
     public function store(ClientRequest $request)
     {
         try {
-            $this->clientServices->store($request->all());
-            flash(__('Cliente salvo com sucesso'), 'alert-success');
+            $this->clientRepository->create($request->all());
+            flash(__('Successfully saved registration'), 'alert-success');
             return redirect()
                 ->route('home');
         } catch (\Exception $e) {
             report($e);
-            flash(__('Erro ao gravar cliente'), 'alert-danger');
+            flash(__('Error writing record'), 'alert-danger');
             return back();
         }
     }

@@ -15,7 +15,3 @@ $factory->define(Account::class, function (Faker $faker) {
         'due_date' => $faker->date()
     ];
 });
-
-$factory->afterCreating(Account::class, function (Account $account, Faker $faker) {
-    $account->transactions()->save(factory(\App\Models\Transaction::class)->state('balance')->make());
-});
